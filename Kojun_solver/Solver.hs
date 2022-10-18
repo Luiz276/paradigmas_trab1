@@ -1,9 +1,8 @@
 -- Trabalho 1 - Solver - Kojun Solver
 
-module Solver where
-import Structure
+module Kojun_solver.Solver where
+import Kojun_solver.Structure
 import Data.List
-
 -- 3) SOLVER FUNCTIONS
 
 isSingle :: [a] -> Bool

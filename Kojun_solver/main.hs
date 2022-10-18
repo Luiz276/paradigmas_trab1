@@ -8,9 +8,8 @@
 -- greater than the number in the lower cell.
 
 -- main = do 
-    -- putStrLn "8x8:"
-    -- mapM_ print (resolvedor tabuleiro8x8Valores tabuleiro8x8Grupos)
-    -- putStr("\n\n")
-    -- putStrLn "10x10:"
-    -- mapM_ print (resolvedor tabuleiro10x10Valores tabuleiro10x10Grupos)
-
+--     putStrLn "8x8:"
+--     mapM_ print (resolvedor tabuleiro8x8Valores tabuleiro8x8Grupos)
+--     putStr("\n\n")
+--     putStrLn "10x10:"
+--     mapM_ print (resolvedor tabuleiro10x10Valores tabuleiro10x10Grupos)

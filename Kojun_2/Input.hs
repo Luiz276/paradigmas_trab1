@@ -1,11 +1,7 @@
--- Examples of puzzles, in order to test the program
--- More examples can be created, by following the same structure
-
-module Examples where
-import Structure
+module Kojun_2.Input where
 
 -- First example, a 8x8 puzzle
-tabuleiro8x8Valores :: Tabuleiro
+tabuleiro8x8Valores :: [[Int]]
 tabuleiro8x8Valores = [[2,5,0,0,3,0,0,0],
                         [0,0,6,0,0,0,0,0],
                         [0,0,5,0,5,2,0,0],
@@ -15,7 +11,7 @@ tabuleiro8x8Valores = [[2,5,0,0,3,0,0,0],
                         [0,0,0,6,0,0,0,0],
                         [0,0,0,0,4,0,3,2]]
 -- The groups of the 8x8 puzzle
-tabuleiro8x8Grupos :: Tabuleiro
+tabuleiro8x8Grupos :: [[Int]]
 tabuleiro8x8Grupos = [[0,1,1,1,1,2,3,3],
                         [0,0,5,1,2,2,4,4],
                         [6,7,5,8,2,2,9,9],
@@ -28,7 +24,7 @@ tabuleiro8x8Grupos = [[0,1,1,1,1,2,3,3],
 -- -----------------------------------------------------------------------------------------------------
 
 -- Second example, a 10x10 puzzle
-tabuleiro10x10Valores :: Tabuleiro
+tabuleiro10x10Valores :: [[Int]]
 tabuleiro10x10Valores = [[5,0,2,0,2,0,3,1,3,1],
                         [0,4,0,1,0,5,0,5,0,4],
                         [7,5,1,7,0,0,3,1,3,0],
@@ -40,7 +36,7 @@ tabuleiro10x10Valores = [[5,0,2,0,2,0,3,1,3,1],
                         [4,0,3,0,4,0,0,0,0,3],
                         [0,1,0,2,0,6,2,0,2,1]]
 -- The groups of the 10x10 puzzle
-tabuleiro10x10Grupos :: Tabuleiro
+tabuleiro10x10Grupos :: [[Int]]
 tabuleiro10x10Grupos = [[1,2,2,2,3,3,3,3,4,4],
                         [1,1,1,2,6,6,7,7,4,7],
                         [5,5,1,6,6,9,8,7,7,7],

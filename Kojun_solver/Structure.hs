@@ -1,6 +1,6 @@
 -- Trabalho 1 - Structure - Kojun Solver
 
-module Structure where
+module Kojun_solver.Structure where
 
 import Control.Applicative ((<|>))
 import qualified Control.Monad
