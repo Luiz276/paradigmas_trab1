@@ -1,22 +1,42 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use foldr" #-}
 module Sudoku.Matrix where
 
-data Casa = Fixed Int | Possible [Int] deriving (Show, Eq)
+import Sudoku.Input
+
+data Casa = Casa {
+    getValor :: Int,
+    getX :: Int,
+    getY :: Int
+} deriving Eq
+
+--type Tabuleiro = [[Numero]]
+
 type Linha = [Casa]
+
 type Grid = [Linha]
 
 
-readInput :: String -> Grid
-readInput s
-  | length s == 81 = traverse (traverse readCell) . Data.List.Split.chunksOf 9 $ s
-  | otherwise      = Nothing
-  where
-    readCell '.' = Just $ Possible [1..9]
-    readCell c
-      | Data.Char.isDigit c && c > '0' = Just . Fixed . Data.Char.digitToInt $ c
-      | otherwise = Nothing
+readInput :: Grid
+readInput = [[Casa (readVal i j) i j | j <- [0..8]] | i <- [0..8]]  -- fixo para tabuleiros 9x9
 
-showGrid :: Grid -> String
-showGrid = unlines . map (unwords . map showCasa)
+readVal :: Int -> Int -> Int    -- por enquanto é valido somente para 9x9
+readVal i j = (tabuleiro9x9Valores !! i) !! j
 
---main = do
---    print(showGrid )
+showCasa :: Grid -> Int -> Int-> Casa -- retorna elemento de uma casa do tabuleiro
+showCasa grid i j = (grid !! i) !! j
+
+linhaToString :: Linha -> String  -- converte linha para string
+linhaToString [] = "\n"
+linhaToString (atual:resto) = show(getValor atual) ++ linhaToString resto
+
+gridToString :: Grid -> String  -- converte grid para string
+gridToString [] = ""
+gridToString (linha:resto) = (linhaToString linha) ++ (gridToString resto)
+
+printTabuleiro :: Grid -> IO()  -- printa grid
+printTabuleiro tab = putStrLn (gridToString tab)
+
+main :: IO ()
+main = do
+  printTabuleiro readInput
