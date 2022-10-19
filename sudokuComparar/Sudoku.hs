@@ -1,44 +1,66 @@
 module Sudoku where
 
 import Data.List
-import Distribution.Parsec.Position (positionCol)
+import Distribution.Simple.InstallDirs (InstallDirs (docdir))
 
-getX :: (Int, Int) -> Int
-getX (x, _) = x
+-- printar o resultado encontrado
+printRow :: [Int] -> [Char] -> IO ()
+printRow [] _ = do
+  putStrLn ""
+printRow (c : d) [] = do
+  putStr " "
+  putStr (show c)
+  printRow d []
+printRow (c : d) (e : f) = do
+  putStr " "
+  putStr (show c)
+  putStr " "
+  putStr (show e)
+  printRow d f
 
-getY :: (Int, Int) -> Int
-getY (_, y) = y
-
-getValidity :: (Bool, [[Int]]) -> Bool
-getValidity (value, _) = value
+printSudoku :: [[Int]] -> ([[Char]], [[Char]]) -> IO ()
+printSudoku [] _ = putStrLn ""
+printSudoku (a : b) ((crh : crb), []) = do
+  printRow a crh
+  printSudoku b (crb, [])
+printSudoku (a : b) ((crh : crb), (cvh : cvb)) = do
+  printRow a crh
+  printCompVer cvh
+  printSudoku b (crb, cvb)
+  where
+    printCompVer [] = putStrLn ""
+    printCompVer (g : h) = do
+      putStr (show g)
+      putStr "   "
+      printCompVer h
 
 -- funcao para chamar no inicio
-solveSudoku :: [[Int]] -> (Bool, [[Int]])
-solveSudoku grid
+solveSudoku :: [[Int]] -> ([[Char]], [[Char]]) -> (Bool, [[Int]])
+solveSudoku grid comps
   | isSolved grid == (-1, -1) = (True, grid)
-  | otherwise = try grid pos 1
+  | otherwise = try grid comps pos 1
   where
     pos = isSolved grid
 
 -- funcao para testar todas as possibilidades na posição
-try :: [[Int]] -> (Int, Int) -> Int -> (Bool, [[Int]])
-try grid pos num
+try :: [[Int]] -> ([[Char]], [[Char]]) -> (Int, Int) -> Int -> (Bool, [[Int]])
+try grid comps pos num
   | num > 9 = (False, grid)
-  | otherwise = tryAs grid pos num
+  | otherwise = tryAs grid comps pos num
 
-tryAs :: [[Int]] -> (Int, Int) -> Int -> (Bool, [[Int]])
-tryAs grid pos num
+tryAs :: [[Int]] -> ([[Char]], [[Char]]) -> (Int, Int) -> Int -> (Bool, [[Int]])
+tryAs grid comps pos num
   | validity && solved = (True, gridfinal)
-  | otherwise = try grid pos num2
+  | otherwise = try grid comps pos num2
   where
-    validity = test grid pos num
+    validity = test grid comps pos num
     grid2 = changeCell grid pos num
-    (solved, gridfinal) = solveSudoku grid2
+    (solved, gridfinal) = solveSudoku grid2 comps
     num2 = num + 1
 
 -- testa se posição é aceita
-test :: [[Int]] -> (Int, Int) -> Int -> Bool
-test grid pos num = and [checkColumn grid pos num, checkLine grid pos num, checkSquare grid pos num]
+test :: [[Int]] -> ([[Char]], [[Char]]) -> (Int, Int) -> Int -> Bool
+test grid char pos num = and [checkColumn grid pos num, checkLine grid pos num, checkSquare grid pos num, checkComp grid char pos num]
 
 -- testa linha
 checkLine :: [[Int]] -> (Int, Int) -> Int -> Bool
@@ -79,6 +101,47 @@ getListSquare grid (row, column) = sliceSquare row ++ sliceSquare row2 ++ sliceS
     sliceSquare a = slice column column2 (getRow grid a)
       where
         column2 = column + 2
+
+-- testa comparações
+checkComp :: [[Int]] -> ([[Char]], [[Char]]) -> (Int, Int) -> Int -> Bool
+checkComp grid (comp_hor, comp_ver) (row, column) num = and $ map compare neighboors
+  where
+    neighboors = getNeighboors grid (row, column)
+    compare :: (Int, Int) -> Bool
+    compare (n_row, n_column) = finalCompare n_num num operator
+      where
+        n_num = grid !! n_row !! n_column
+        operator = getOperator (row, column) (n_row, n_column) (comp_hor, comp_ver)
+        finalCompare l r op
+          | op == '<' = l < r
+          | otherwise = l > r
+
+-- pega operador entre as posicoes
+getOperator :: (Int, Int) -> (Int, Int) -> ([[Char]], [[Char]]) -> Char
+getOperator (row, column) (n_row, n_column) (comp_hor, comp_ver)
+  | row == n_row = getop (row, column) (n_row, n_column) comp_hor
+  | otherwise = getop (row, column) (n_row, n_column) comp_ver
+  where
+    getop (r, c) (nr, nc) comps = comps !! minr !! minc
+      where
+        minr = getMin r nr
+        minc = getMin c nc
+        getMin a b
+          | a < b = a
+          | otherwise = b
+
+-- pega vizinhos de posição
+getNeighboors :: [[Int]] -> (Int, Int) -> [(Int, Int)]
+getNeighboors grid (row, column)
+  | relativeRow >= 0 && relativeColumn >= 0 = [column_n, row_n]
+  | relativeColumn >= 0 = [row_n]
+  | relativeRow >= 0 = [column_n]
+  | otherwise = []
+  where
+    relativeRow = (row `mod` 3) - 1
+    relativeColumn = (column `mod` 3) - 1
+    column_n = (row -1, column)
+    row_n = (row, column -1)
 
 slice :: Int -> Int -> [a] -> [a]
 slice from to xs = take (to - from + 1) (drop from xs)
