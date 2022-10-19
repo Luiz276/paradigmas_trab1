@@ -40,4 +40,5 @@ main = do
   --   let first = [3, 1, 6, 5, 1, 8, 4, 9, 9]
   let grid = [[0 | i <- [1 .. 9]] | j <- [1 .. 9]]
   let (_, result) = solveSudoku grid (comp_hor, comp_ver)
+
   printSudoku result (comp_hor, comp_ver)

@@ -151,7 +151,10 @@ getOperator (row, column) (n_row, n_column) (comp_hor, comp_ver)
 
 -- pega vizinhos ortogonais da posição para realizar as comparaçoes
 getNeighboors :: [[Int]] -> (Int, Int) -> [(Int, Int)]
-getNeighboors grid (row, column)
+getNeighboors grid pos = (getNeighboorsLast grid pos) ++ (getNeighboorsNext grid pos)
+
+getNeighboorsLast :: [[Int]] -> (Int, Int) -> [(Int, Int)]
+getNeighboorsLast grid (row, column)
   | relativeRow >= 0 && relativeColumn >= 0 = [column_n, row_n]
   | relativeColumn >= 0 = [row_n]
   | relativeRow >= 0 = [column_n]
@@ -161,6 +164,22 @@ getNeighboors grid (row, column)
     relativeColumn = (column `mod` 3) - 1
     column_n = (row -1, column)
     row_n = (row, column -1)
+
+getNeighboorsNext :: [[Int]] -> (Int, Int) -> [(Int, Int)]
+getNeighboorsNext grid (row, column)
+  | validRowN && validColumnN = [column_n, row_n]
+  | validRowN = [row_n]
+  | validColumnN = [column_n]
+  | otherwise = []
+  where
+    relativeRow = (row `mod` 3) + 1
+    relativeColumn = (column `mod` 3) + 1
+    column_n = (row + 1, column)
+    row_n = (row, column + 1)
+    n_row_n = grid !! row !! (column + 1)
+    n_column_n = grid !! (row + 1) !! column
+    validRowN = relativeColumn < 3 && n_row_n /= 0
+    validColumnN = relativeRow < 3 && n_column_n /= 0
 
 ------------------------------------------------------
 
