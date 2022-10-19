@@ -34,7 +34,8 @@ printSudoku (a : b) ((crh : crb), (cvh : cvb)) = do
       putStr "   "
       printCompVer h
 
--- funcao para chamar no inicio
+-- funcao para chamar no inicio, checa se é possivel completar o sudoku por meio de backtracking
+-- retorna uma tupla com se foi possivel completar e o resultado obtido
 solveSudoku :: [[Int]] -> ([[Char]], [[Char]]) -> (Bool, [[Int]])
 solveSudoku grid comps
   | isSolved grid == (-1, -1) = (True, grid)
@@ -42,7 +43,12 @@ solveSudoku grid comps
   where
     pos = isSolved grid
 
--- funcao para testar todas as possibilidades na posição
+--------------------------------------------------
+
+-- funcao que testa todos os números de 1 .. 9 na posição ecolhida
+-- caso seja valido colocar o numero nessa posição, continua o backtracking
+-- com um novo tabuleiro modificado
+-- caso não seja retorna do backtracking e tenta seu antecessor
 try :: [[Int]] -> ([[Char]], [[Char]]) -> (Int, Int) -> Int -> (Bool, [[Int]])
 try grid comps pos num
   | num > 9 = (False, grid)
@@ -58,11 +64,15 @@ tryAs grid comps pos num
     (solved, gridfinal) = solveSudoku grid2 comps
     num2 = num + 1
 
--- testa se posição é aceita
+------------------------------------------------------
+
+-- testa se posição é valido colocar número nessa posição
 test :: [[Int]] -> ([[Char]], [[Char]]) -> (Int, Int) -> Int -> Bool
 test grid char pos num = and [checkColumn grid pos num, checkLine grid pos num, checkSquare grid pos num, checkComp grid char pos num]
 
--- testa linha
+------------------------------------------------------
+
+-- testa se não existe nenhum numero que estamos tentando inserir ja esta na fila
 checkLine :: [[Int]] -> (Int, Int) -> Int -> Bool
 checkLine grid (row, column) num = checkLineAs gridRow num
   where
@@ -74,7 +84,9 @@ checkLineAs (a : b) num
   | a == num = False
   | otherwise = checkLineAs b num
 
--- testa coluna
+------------------------------------------------------
+
+-- testa se não existe nenhum numero que estamos tentando inserir ja esta na coluna
 checkColumn :: [[Int]] -> (Int, Int) -> Int -> Bool
 checkColumn grid (row, column) num = checkLineAs listColumn num
   where
@@ -83,7 +95,10 @@ checkColumn grid (row, column) num = checkLineAs listColumn num
 getListColumn :: [[Int]] -> Int -> [Int]
 getListColumn grid column = map (head . drop column) grid
 
--- testa quadrado
+------------------------------------------------------
+
+-- testa se o número ja esta presente no seu respectivo
+-- quadrado 3x3
 checkSquare :: [[Int]] -> (Int, Int) -> Int -> Bool
 checkSquare grid (row, column) num = checkLineAs listSquare num
   where
@@ -102,7 +117,9 @@ getListSquare grid (row, column) = sliceSquare row ++ sliceSquare row2 ++ sliceS
       where
         column2 = column + 2
 
--- testa comparações
+------------------------------------------------------
+
+-- testa se o número esta de acordo com as comparações
 checkComp :: [[Int]] -> ([[Char]], [[Char]]) -> (Int, Int) -> Int -> Bool
 checkComp grid (comp_hor, comp_ver) (row, column) num = and $ map compare neighboors
   where
@@ -126,11 +143,13 @@ getOperator (row, column) (n_row, n_column) (comp_hor, comp_ver)
       where
         minr = getMin r nr
         minc = getMin c nc
+        -- fazer o minimo entre coordenadas já basta para pegar a posição
+        -- do comparador entre as duas posições
         getMin a b
           | a < b = a
           | otherwise = b
 
--- pega vizinhos de posição
+-- pega vizinhos ortogonais da posição para realizar as comparaçoes
 getNeighboors :: [[Int]] -> (Int, Int) -> [(Int, Int)]
 getNeighboors grid (row, column)
   | relativeRow >= 0 && relativeColumn >= 0 = [column_n, row_n]
@@ -143,9 +162,17 @@ getNeighboors grid (row, column)
     column_n = (row -1, column)
     row_n = (row, column -1)
 
+------------------------------------------------------
+
+-- funcao auxiliar para cortar uma lista
 slice :: Int -> Int -> [a] -> [a]
 slice from to xs = take (to - from + 1) (drop from xs)
 
+------------------------------------------------------
+
+--funcao utilizada para saber se o sudoku já foi resolvido
+-- caso estaja completo retorna (-1, -1)
+-- caso não esteja retorna a coordenada do 0 encontrado
 isSolved :: [[Int]] -> (Int, Int) -- (row, column)
 isSolved grid = getPos columns 0
   where
@@ -173,9 +200,9 @@ getPos (a : b) cnt
     cnt2 = cnt + 1
 getPos [] _ = (-1, -1)
 
--- testa se é possível completar o sudoku com esse numero
--- test :: [[Int]] -> (Int, Int) -> Int -> (Bool, [[Int]])
--- novo grid com o valor da coordenada mudado
+------------------------------------------------------
+
+-- cria uma nova matriz setando o valor estipulado na posição para o numero recebido
 changeCell :: [[Int]] -> (Int, Int) -> Int -> [[Int]]
 changeCell grid (row, column) num = before ++ [newrow] ++ after
   where
@@ -193,6 +220,7 @@ changeCell grid (row, column) num = before ++ [newrow] ++ after
             column2 = column + 1
             gridRow = getRow grid row
 
+-- retorna uma linha da matriz apartir de um indice
 getRow :: [[Int]] -> Int -> [Int]
 getRow grid index = getRowAs grid index 0
 
